@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Auction Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ... existing CSS variables and base styles ... */
+
+        .card-container {
+            perspective: 1000px;
+            margin: 1rem 0;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), #1976d2);
+            color: white;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+
+        .card-logo {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            width: 60px;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- ... existing theme toggle and container ... -->
+
+    <div class="card-container">
+        <div class="card-inner" id="cardInner">
+            <div class="card-front">
+                <img src="visa.png" class="card-logo" id="cardLogo">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <input type="text" placeholder="Card Number" id="cardNumber" class="card-input">
+                <div class="card-details">
+                    <input type="text" placeholder="MM/YY" class="card-input half">
+                    <input type="text" placeholder="CVC" class="card-input half" id="cvcInput">
+                </div>
+            </div>
+            <div class="card-back">
+                <div class="magnetic-strip"></div>
+                <div class="cvc-display">
+                    <span id="cvcDisplay">•••</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ... rest of payment form ... -->
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Card Type Detection
+        const cardNumber = document.getElementById('cardNumber');
+        const cardLogo = document.getElementById('cardLogo');
+        
+        cardNumber.addEventListener('input', (e) => {
+            const number = e.target.value.replace(/\D/g, '');
+            let cardType = 'unknown';
+            
+            if (/^4/.test(number)) {
+                cardType = 'visa';
+            } else if (/^5[1-5]/.test(number)) {
+                cardType = 'mastercard';
+            } else if (/^3[47]/.test(number)) {
+                cardType = 'amex';
+            }
+            
+            cardLogo.src = `${cardType}.png`;
+            updateProgress();
+        });
+
+        // Card Flip Animation
+        const cvcInput = document.getElementById('cvcInput');
+        const cardInner = document.getElementById('cardInner');
+        
+        cvcInput.addEventListener('focus', () => {
+            cardInner.classList.add('card-flipped');
+        });
+        
+        cvcInput.addEventListener('blur', () => {
+            cardInner.classList.remove('card-flipped');
+        });
+
+        // Payment Processing Simulation
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            overlay.style.display = 'none';
+            showPaymentResult();
+        });
+
+        function updateProgress() {
+            const filledInputs = [...document.querySelectorAll('input')]
+                .filter(input => input.value.trim() !== '').length;
+            const progress = (filledInputs / 4) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        function showPaymentResult() {
+            // Add confetti animation or success message
+        }
+    </script>
+</body>
+</html> 
